@@ -1,0 +1,98 @@
+{% extends "admin/base.html" %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <h1>Prospección</h1>
+    <p class="sub">{{ negocios|length }} negocio{{ '' if negocios|length == 1 else 's' }}
+      {%- if sin_leer %} · <a href="{{ url_for('admin_consultas') }}">{{ sin_leer }} consulta{{ '' if sin_leer == 1 else 's' }} sin leer</a>{% endif %}</p>
+  </div>
+  <button onclick="abrirNuevoNegocio()">+ Nuevo negocio</button>
+</header>
+
+<div class="conteos">
+  {% for clave, label in estados %}
+    <a class="conteo {{ 'activo' if filtros.estado == clave }}"
+       href="{{ url_for('admin_index', estado=clave if filtros.estado != clave else None) }}">
+      <strong>{{ conteos.get(clave, 0) }}</strong><span>{{ label }}</span>
+    </a>
+  {% endfor %}
+</div>
+
+<form class="filtros" method="get">
+  <input name="q" placeholder="Buscar por nombre" value="{{ filtros.q or '' }}">
+  <select name="rubro">
+    <option value="">Todos los rubros</option>
+    {% for r in rubros %}
+      <option value="{{ r }}" {{ 'selected' if filtros.rubro == r }}>{{ r }}</option>
+    {% endfor %}
+  </select>
+  {% if filtros.estado %}<input type="hidden" name="estado" value="{{ filtros.estado }}">{% endif %}
+  <button type="submit">Filtrar</button>
+  <a href="{{ url_for('admin_index') }}">Limpiar</a>
+</form>
+
+<table class="tabla">
+  <thead>
+    <tr>
+      <th>Negocio</th><th>Rubro</th><th>Lugar</th><th>Contacto</th>
+      <th>Estado</th><th>Días</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for n in negocios %}
+      <tr onclick="location.href='{{ url_for('admin_negocio', negocio_id=n.id) }}'">
+        <td>
+          <strong>{{ n.nombre }}</strong>
+          {% if n.origen == 'formulario' %}<span class="etiqueta">formulario</span>{% endif %}
+        </td>
+        <td>{{ n.rubro or '—' }}</td>
+        <td>{{ n.ciudad or '—' }}</td>
+        <td class="chico">
+          {% if n.email %}{{ n.email }}{% elif n.instagram %}{{ n.instagram }}{% elif n.telefono %}{{ n.telefono }}{% else %}—{% endif %}
+        </td>
+        <td><span class="pill pill-{{ n.estado }}">{{ n.estado_label }}</span></td>
+        <td class="chico">{{ n.dias_desde_contacto if n.dias_desde_contacto is not none else '—' }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="vacio">No hay negocios todavía. Cargá el primero.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<dialog id="dlg-negocio">
+  <form onsubmit="guardarNuevoNegocio(event)">
+    <h2>Nuevo negocio</h2>
+    <label>Nombre <input name="nombre" required></label>
+    <div class="fila">
+      <label>Rubro <input name="rubro"></label>
+      <label>Ciudad <input name="ciudad"></label>
+    </div>
+    <div class="fila">
+      <label>Email <input name="email" type="email"></label>
+      <label>Teléfono <input name="telefono"></label>
+    </div>
+    <label>Web <input name="web" placeholder="https://"></label>
+    <label>Instagram <input name="instagram" placeholder="@usuario"></label>
+    <div class="acciones">
+      <button type="button" class="secundario" onclick="document.getElementById('dlg-negocio').close()">Cancelar</button>
+      <button type="submit">Guardar</button>
+    </div>
+  </form>
+</dialog>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function abrirNuevoNegocio() {
+    document.getElementById('dlg-negocio').showModal();
+  }
+
+  async function guardarNuevoNegocio(e) {
+    e.preventDefault();
+    const datos = Object.fromEntries(new FormData(e.target));
+    const negocio = await api('/api/negocios', { method: 'POST', body: datos });
+    if (negocio) location.href = '/admin/negocio/' + negocio.id;
+  }
+</script>
+{% endblock %}

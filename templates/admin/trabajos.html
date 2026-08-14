@@ -1,0 +1,72 @@
+{% extends "admin/base.html" %}
+{% block title %}Trabajos — Visión{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <h1>Trabajos</h1>
+    <p class="sub">Lo que se muestra en la vidriera del sitio público.</p>
+  </div>
+  <button onclick="document.getElementById('dlg-trabajo').showModal()">+ Nuevo trabajo</button>
+</header>
+
+<table class="tabla">
+  <thead>
+    <tr><th>Orden</th><th>Nombre</th><th>Stack</th><th>Link</th><th>Publicado</th><th></th></tr>
+  </thead>
+  <tbody>
+    {% for t in trabajos %}
+      <tr>
+        <td class="chico">{{ t.orden }}</td>
+        <td>
+          <strong>{{ t.nombre }}</strong>
+          {% if t.bajada %}<div class="chico">{{ t.bajada }}</div>{% endif %}
+        </td>
+        <td class="chico">{{ t.stack or '—' }}</td>
+        <td class="chico">{% if t.url %}<a href="{{ t.url }}" target="_blank" rel="noopener">abrir</a>{% else %}—{% endif %}</td>
+        <td><input type="checkbox" {{ 'checked' if t.publicado }} onchange="publicar({{ t.id }}, this.checked)"></td>
+        <td><button class="borrar" onclick="borrarTrabajo({{ t.id }})">×</button></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="vacio">Todavía no hay trabajos cargados.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<dialog id="dlg-trabajo">
+  <form onsubmit="guardarTrabajo(event)">
+    <h2>Nuevo trabajo</h2>
+    <label>Nombre <input name="nombre" required></label>
+    <label>Bajada <input name="bajada" placeholder="Una línea de qué es"></label>
+    <label>Descripción <textarea name="descripcion" rows="3"></textarea></label>
+    <label>Stack <input name="stack" placeholder="Flask · Postgres · Leaflet"></label>
+    <label>URL <input name="url" placeholder="https://"></label>
+    <label>Imagen <input name="imagen" placeholder="URL de la captura"></label>
+    <label>Orden <input name="orden" type="number" value="0"></label>
+    <div class="acciones">
+      <button type="button" class="secundario" onclick="document.getElementById('dlg-trabajo').close()">Cancelar</button>
+      <button type="submit">Guardar</button>
+    </div>
+  </form>
+</dialog>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  async function guardarTrabajo(e) {
+    e.preventDefault();
+    const datos = Object.fromEntries(new FormData(e.target));
+    datos.orden = parseInt(datos.orden, 10) || 0;
+    if (await api('/api/trabajos', { method: 'POST', body: datos })) location.reload();
+  }
+
+  async function publicar(id, publicado) {
+    await api('/api/trabajos/' + id, { method: 'PATCH', body: { publicado } });
+  }
+
+  async function borrarTrabajo(id) {
+    if (!confirm('¿Borrar el trabajo?')) return;
+    if (await api('/api/trabajos/' + id, { method: 'DELETE' })) location.reload();
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Visión — Entrar</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+</head>
+<body class="pantalla-login">
+  <form class="caja-login" method="post">
+    <h1>Visión</h1>
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+    <label>Email <input name="email" type="email" required autofocus></label>
+    <label>Contraseña <input name="password" type="password" required></label>
+    <button type="submit">Entrar</button>
+  </form>
+</body>
+</html>

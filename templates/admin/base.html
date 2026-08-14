@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Visión — Admin{% endblock %}</title>
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+</head>
+<body>
+  <aside class="lateral">
+    <a class="marca" href="{{ url_for('admin_index') }}">Visión</a>
+    <nav>
+      <a href="{{ url_for('admin_index') }}">Prospección</a>
+      <a href="{{ url_for('admin_consultas') }}">Consultas</a>
+      <a href="{{ url_for('admin_trabajos') }}">Trabajos</a>
+    </nav>
+    <a class="salir" href="{{ url_for('admin_logout') }}">Salir</a>
+  </aside>
+
+  <main class="principal">
+    {% block contenido %}{% endblock %}
+  </main>
+
+  <script src="{{ url_for('static', filename='admin.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

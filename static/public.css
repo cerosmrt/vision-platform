@@ -1,0 +1,79 @@
+:root {
+  --tinta: #14171a;
+  --tinta-suave: #5a6570;
+  --papel: #ffffff;
+  --papel-suave: #f5f6f7;
+  --borde: #e3e6e8;
+  --acento: #1f4fd8;
+  --radio: 10px;
+  --ancho: 1040px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--tinta);
+  background: var(--papel);
+  line-height: 1.6;
+}
+
+h1, h2, h3 { line-height: 1.2; margin: 0 0 .5em; }
+a { color: var(--acento); }
+
+.nav {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; padding: 1.25rem 1.5rem;
+  max-width: var(--ancho); margin: 0 auto;
+}
+.nav .marca { font-weight: 700; font-size: 1.25rem; color: var(--tinta); text-decoration: none; letter-spacing: -.02em; }
+.nav nav { display: flex; gap: 1.25rem; }
+.nav nav a { color: var(--tinta-suave); text-decoration: none; font-size: .95rem; }
+.nav nav a:hover { color: var(--tinta); }
+
+section { max-width: var(--ancho); margin: 0 auto; padding: 3.5rem 1.5rem; }
+
+.hero h1 { font-size: clamp(2rem, 6vw, 3.25rem); letter-spacing: -.03em; max-width: 16ch; }
+.bajada { color: var(--tinta-suave); max-width: 62ch; font-size: 1.05rem; }
+
+.boton, button {
+  display: inline-block; margin-top: 1.5rem; padding: .8rem 1.5rem;
+  background: var(--tinta); color: #fff; border: 0; border-radius: var(--radio);
+  font-size: 1rem; text-decoration: none; cursor: pointer;
+}
+.boton:hover, button:hover { background: var(--acento); }
+button:disabled { opacity: .5; cursor: default; }
+
+.servicios { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
+.servicios article { background: var(--papel-suave); border-radius: var(--radio); padding: 1.5rem; }
+.servicios h3 { font-size: 1.1rem; }
+.servicios p { color: var(--tinta-suave); margin: 0; font-size: .95rem; }
+
+.trabajos .grilla { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+.trabajo { border: 1px solid var(--borde); border-radius: var(--radio); padding: 1.5rem; }
+.trabajo img { width: 100%; max-width: 100%; border-radius: 6px; margin-bottom: 1rem; }
+.trabajo .stack { font-size: .85rem; color: var(--tinta-suave); font-family: ui-monospace, monospace; }
+.trabajo .link { font-weight: 600; text-decoration: none; }
+.vacio { color: var(--tinta-suave); }
+
+.contacto form { display: grid; gap: 1rem; max-width: 480px; margin-top: 1.5rem; }
+.contacto label { display: grid; gap: .35rem; font-size: .9rem; color: var(--tinta-suave); }
+.contacto input, .contacto textarea {
+  padding: .7rem; border: 1px solid var(--borde); border-radius: 8px;
+  font: inherit; color: var(--tinta); background: var(--papel);
+}
+.contacto input:focus, .contacto textarea:focus { outline: 2px solid var(--acento); outline-offset: 1px; }
+.contacto button { justify-self: start; margin-top: 0; }
+.aviso { color: var(--acento); font-size: .9rem; margin: 0; }
+
+.pie {
+  border-top: 1px solid var(--borde); margin-top: 2rem;
+  padding: 2rem 1.5rem; text-align: center; color: var(--tinta-suave); font-size: .9rem;
+}
+.pie p { margin: .25rem 0; }
+.pie .chico { font-size: .8rem; }
+
+@media (max-width: 600px) {
+  section { padding: 2.5rem 1.25rem; }
+}

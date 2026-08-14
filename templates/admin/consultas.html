@@ -1,0 +1,55 @@
+{% extends "admin/base.html" %}
+{% block title %}Consultas — Visión{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <h1>Consultas</h1>
+    <p class="sub">Lo que llega por el formulario del sitio.</p>
+  </div>
+</header>
+
+<table class="tabla">
+  <thead>
+    <tr><th>Fecha</th><th>Quién</th><th>Contacto</th><th>Mensaje</th><th></th></tr>
+  </thead>
+  <tbody>
+    {% for c in consultas %}
+      <tr class="{{ '' if c.leida else 'sin-leer' }}">
+        <td class="chico">{{ c.creada_en.strftime('%d/%m/%Y') if c.creada_en }}</td>
+        <td>
+          <strong>{{ c.nombre or '—' }}</strong>
+          {% if c.negocio %}<div class="chico">{{ c.negocio }}</div>{% endif %}
+        </td>
+        <td class="chico">{{ c.email or '' }}<br>{{ c.telefono or '' }}</td>
+        <td class="chico">{{ c.mensaje or '—' }}</td>
+        <td class="acciones-celda">
+          {% if c.negocio_id %}
+            <a href="{{ url_for('admin_negocio', negocio_id=c.negocio_id) }}">Ver negocio</a>
+          {% else %}
+            <button class="secundario" onclick="convertir({{ c.id }})">Pasar a prospección</button>
+          {% endif %}
+          {% if not c.leida %}
+            <button class="secundario" onclick="marcarLeida({{ c.id }})">Marcar leída</button>
+          {% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5" class="vacio">Todavía no llegó ninguna consulta.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  async function convertir(id) {
+    const negocio = await api(`/api/consultas/${id}/convertir`, { method: 'POST' });
+    if (negocio) location.href = '/admin/negocio/' + negocio.id;
+  }
+
+  async function marcarLeida(id) {
+    if (await api(`/api/consultas/${id}/leida`, { method: 'PATCH' })) location.reload();
+  }
+</script>
+{% endblock %}

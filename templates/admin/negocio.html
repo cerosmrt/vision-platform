@@ -1,0 +1,154 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ negocio.nombre }} — Visión{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <a class="volver" href="{{ url_for('admin_index') }}">← Prospección</a>
+    <h1>{{ negocio.nombre }}</h1>
+    <p class="sub">{{ negocio.rubro or 'Sin rubro' }} · {{ negocio.ciudad or 'Sin ciudad' }}</p>
+  </div>
+  <select id="estado" onchange="cambiarEstado(this.value)">
+    {% for clave, label in estados %}
+      <option value="{{ clave }}" {{ 'selected' if negocio.estado == clave }}>{{ label }}</option>
+    {% endfor %}
+  </select>
+</header>
+
+<div class="columnas">
+  <div class="columna">
+    <section class="tarjeta">
+      <h2>Datos</h2>
+      <form onsubmit="guardarDatos(event)">
+        <label>Nombre <input name="nombre" value="{{ negocio.nombre }}"></label>
+        <div class="fila">
+          <label>Rubro <input name="rubro" value="{{ negocio.rubro or '' }}"></label>
+          <label>Ciudad <input name="ciudad" value="{{ negocio.ciudad or '' }}"></label>
+        </div>
+        <div class="fila">
+          <label>Email <input name="email" value="{{ negocio.email or '' }}"></label>
+          <label>Teléfono <input name="telefono" value="{{ negocio.telefono or '' }}"></label>
+        </div>
+        <label>Web <input name="web" value="{{ negocio.web or '' }}"></label>
+        <div class="fila">
+          <label>Instagram <input name="instagram" value="{{ negocio.instagram or '' }}"></label>
+          <label>Facebook <input name="facebook" value="{{ negocio.facebook or '' }}"></label>
+        </div>
+        <button type="submit">Guardar</button>
+      </form>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Diagnóstico</h2>
+      <p class="ayuda">Qué tiene hoy y qué le falta. Es de donde sale el gancho del mail.</p>
+      <textarea id="diagnostico" rows="8" onblur="guardarCampo('diagnostico', this.value)">{{ negocio.diagnostico or '' }}</textarea>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Borrador del mail</h2>
+      <p class="ayuda">Se copia y se manda desde tu cuenta. La plataforma no envía.</p>
+      <textarea id="borrador_mail" rows="12" onblur="guardarCampo('borrador_mail', this.value)">{{ negocio.borrador_mail or '' }}</textarea>
+      <button class="secundario" onclick="copiarBorrador()">Copiar al portapapeles</button>
+    </section>
+  </div>
+
+  <div class="columna">
+    <section class="tarjeta">
+      <h2>Contactos</h2>
+      <ul class="lista">
+        {% for c in negocio.contactos %}
+          <li>
+            <div>
+              <strong>{{ c.nombre or 'Sin nombre' }}</strong>
+              {% if c.rol %}<span class="chico">{{ c.rol }}</span>{% endif %}
+              <div class="chico">{{ c.email or '' }} {{ c.telefono or '' }}</div>
+            </div>
+            <button class="borrar" onclick="borrarContacto({{ c.id }})">×</button>
+          </li>
+        {% else %}
+          <li class="vacio">Sin contactos.</li>
+        {% endfor %}
+      </ul>
+      <form class="agregar" onsubmit="agregarContacto(event)">
+        <input name="nombre" placeholder="Nombre">
+        <input name="rol" placeholder="Rol">
+        <input name="email" placeholder="Email">
+        <input name="telefono" placeholder="Teléfono">
+        <button type="submit">Agregar</button>
+      </form>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Notas</h2>
+      <textarea id="notas" rows="6" onblur="guardarCampo('notas', this.value)">{{ negocio.notas or '' }}</textarea>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Historial</h2>
+      <form class="agregar" onsubmit="agregarActividad(event)">
+        <select name="tipo">
+          {% for clave, label in tipos_actividad %}
+            <option value="{{ clave }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+        <input name="detalle" placeholder="Qué pasó" required>
+        <button type="submit">Anotar</button>
+      </form>
+      <ul class="historial">
+        {% for a in negocio.actividades %}
+          <li>
+            <span class="pill">{{ a.tipo }}</span>
+            <div>
+              <div>{{ a.detalle }}</div>
+              <div class="chico">{{ a.fecha.strftime('%d/%m/%Y %H:%M') if a.fecha }}</div>
+            </div>
+          </li>
+        {% else %}
+          <li class="vacio">Todavía no pasó nada.</li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const ID = {{ negocio.id }};
+
+  async function guardarCampo(campo, valor) {
+    await api('/api/negocios/' + ID, { method: 'PATCH', body: { [campo]: valor } });
+  }
+
+  async function guardarDatos(e) {
+    e.preventDefault();
+    const datos = Object.fromEntries(new FormData(e.target));
+    if (await api('/api/negocios/' + ID, { method: 'PATCH', body: datos })) location.reload();
+  }
+
+  async function cambiarEstado(estado) {
+    if (await api('/api/negocios/' + ID, { method: 'PATCH', body: { estado } })) location.reload();
+  }
+
+  async function agregarContacto(e) {
+    e.preventDefault();
+    const datos = Object.fromEntries(new FormData(e.target));
+    if (await api(`/api/negocios/${ID}/contactos`, { method: 'POST', body: datos })) location.reload();
+  }
+
+  async function borrarContacto(id) {
+    if (!confirm('¿Borrar el contacto?')) return;
+    if (await api('/api/contactos/' + id, { method: 'DELETE' })) location.reload();
+  }
+
+  async function agregarActividad(e) {
+    e.preventDefault();
+    const datos = Object.fromEntries(new FormData(e.target));
+    if (await api(`/api/negocios/${ID}/actividades`, { method: 'POST', body: datos })) location.reload();
+  }
+
+  function copiarBorrador() {
+    navigator.clipboard.writeText(document.getElementById('borrador_mail').value);
+  }
+</script>
+{% endblock %}
