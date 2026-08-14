@@ -1,10 +1,11 @@
-/* Visión — continuación estética de Voider.
-   Negro, blanco, Garamond. Una sola cosa por pantalla. */
+/* Visión — el minimalismo de Voider, en clave editorial.
+   Papel blanco, tinta negra, Garamond. Una sola cosa por pantalla. */
 
 :root {
-  --negro: #000;
-  --blanco: #fff;
+  --papel: #fff;
+  --tinta: #111;
   --gris: #767676;
+  --tenue: #ddd;
   --garamond: Garamond, "EB Garamond", "Adobe Garamond Pro", "Cormorant Garamond",
                Baskerville, "Times New Roman", serif;
 }
@@ -15,8 +16,8 @@ html, body { height: 100%; }
 
 body {
   margin: 0;
-  background: var(--negro);
-  color: var(--blanco);
+  background: var(--papel);
+  color: var(--tinta);
   font-family: var(--garamond);
   font-size: clamp(17px, 1.6vw, 20px);
   line-height: 1.6;
@@ -26,40 +27,59 @@ body {
   padding: 2rem 1.5rem;
 }
 
-a { color: var(--blanco); text-decoration: none; border-bottom: 1px solid #333; }
-a:hover { border-bottom-color: var(--blanco); }
+a { color: var(--tinta); text-decoration: none; border-bottom: 1px solid var(--tenue); }
+a:hover { border-bottom-color: var(--tinta); }
 
-::selection { background: var(--blanco); color: var(--negro); }
+::selection { background: var(--tinta); color: var(--papel); }
 
 /* Portal --------------------------------------------------------------- */
 .portal { width: min(46ch, 100%); }
 
-.portal h1 {
-  font-weight: 400;
-  font-size: clamp(2.5rem, 8vw, 4rem);
-  letter-spacing: .06em;
+/* Lo primero que se ve: cuántos trabajos hay hechos. */
+.cifra {
+  font-size: clamp(6rem, 22vw, 12rem);
+  line-height: .85;
   margin: 0;
+  letter-spacing: -.04em;
+  font-variant-numeric: lining-nums;
 }
+.cifra-pie { color: var(--gris); font-style: italic; margin: .75rem 0 0; }
 
 .linea { color: var(--gris); margin: .25rem 0 0; font-style: italic; }
 
 .obras { list-style: none; padding: 0; margin: 4rem 0; }
 .obras li { margin-bottom: 1rem; }
-.obras a, .obras span { display: inline; }
 .obras em { display: block; color: var(--gris); font-size: .85em; font-style: italic; }
 
 .entrada {
   display: inline-block;
   margin-top: 2rem;
+  background: transparent;
+  color: var(--tinta);
+  border: 0;
   border-bottom: 1px solid var(--gris);
+  font-family: var(--garamond);
+  font-size: 1em;
+  padding: 0 0 .1rem;
+  cursor: pointer;
 }
+.entrada:hover { border-bottom-color: var(--tinta); }
 
-/* Formulario ----------------------------------------------------------- */
-.formulario { width: min(52ch, 100%); }
+/* Modal del brief ------------------------------------------------------ */
+dialog {
+  background: var(--papel);
+  color: var(--tinta);
+  border: 1px solid var(--tenue);
+  padding: clamp(1.75rem, 5vw, 3rem);
+  width: min(52ch, 92vw);
+  max-height: 88vh;
+  margin: auto;
+}
+dialog::backdrop { background: rgba(255, 255, 255, .8); }
 
 .paso label {
   display: block;
-  font-size: clamp(1.5rem, 4.5vw, 2.1rem);
+  font-size: clamp(1.4rem, 4vw, 1.9rem);
   line-height: 1.25;
   margin-bottom: .5rem;
 }
@@ -69,9 +89,9 @@ a:hover { border-bottom-color: var(--blanco); }
 textarea {
   width: 100%;
   background: transparent;
-  color: var(--blanco);
+  color: var(--tinta);
   border: 0;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--tenue);
   font-family: var(--garamond);
   font-size: 1em;
   line-height: 1.6;
@@ -80,10 +100,11 @@ textarea {
   outline: none;
   margin-bottom: 1rem;
 }
-textarea:focus { border-bottom-color: var(--blanco); }
-textarea::placeholder { color: #444; font-style: italic; }
+textarea:focus { border-bottom-color: var(--tinta); }
+textarea::placeholder { color: #bbb; font-style: italic; }
 
 .pasos { display: flex; gap: 1.5rem; margin-top: 2rem; }
+.pasos #cerrar { margin-left: auto; }
 
 .pasos button {
   background: transparent;
@@ -95,10 +116,10 @@ textarea::placeholder { color: #444; font-style: italic; }
   padding: 0;
   cursor: pointer;
 }
-.pasos button:hover { color: var(--blanco); border-bottom-color: var(--blanco); }
+.pasos button:hover { color: var(--tinta); border-bottom-color: var(--tinta); }
 .pasos button:disabled { opacity: .4; cursor: default; }
 
-.cuenta { color: #333; font-size: .8em; margin-top: 3rem; letter-spacing: .1em; }
+.cuenta { color: #bbb; font-size: .8em; margin-top: 2rem; letter-spacing: .1em; }
 
-#gracias p { margin: 0; font-size: clamp(1.5rem, 4.5vw, 2.1rem); }
+#gracias p { margin: 0; font-size: clamp(1.4rem, 4vw, 1.9rem); }
 #gracias .linea { font-size: 1rem; }

@@ -2,8 +2,8 @@
 
 {% block contenido %}
 <main class="portal">
-  <h1>Visión</h1>
-  <p class="linea">Desarrollo web a medida.</p>
+  <p class="cifra">{{ trabajos|length }}</p>
+  <p class="cifra-pie">trabajo{{ '' if trabajos|length == 1 else 's' }} hecho{{ '' if trabajos|length == 1 else 's' }}</p>
 
   {% if trabajos %}
     <ul class="obras">
@@ -20,6 +20,100 @@
     </ul>
   {% endif %}
 
-  <a class="entrada" href="{{ url_for('formulario') }}">¿estás interesado?</a>
+  <button class="entrada" id="abrir">¿estás interesado?</button>
 </main>
+
+<dialog id="modal">
+  <form id="brief">
+    {% for campo, pregunta, ayuda in preguntas %}
+      <fieldset class="paso" {% if not loop.first %}hidden{% endif %}>
+        <label for="c-{{ campo }}">{{ pregunta }}</label>
+        {% if ayuda %}<p class="ayuda">{{ ayuda }}</p>{% endif %}
+        <textarea id="c-{{ campo }}" name="{{ campo }}" rows="3"></textarea>
+      </fieldset>
+    {% endfor %}
+
+    <fieldset class="paso" hidden>
+      <label for="c-nombre">¿Cómo te llamás?</label>
+      <p class="ayuda">Y por dónde te escribo.</p>
+      <textarea id="c-nombre" name="nombre" rows="1" required></textarea>
+      <textarea name="email" rows="1" placeholder="email" required></textarea>
+      <textarea name="telefono" rows="1" placeholder="teléfono"></textarea>
+    </fieldset>
+
+    <nav class="pasos">
+      <button type="button" id="atras" hidden>atrás</button>
+      <button type="button" id="siguiente">siguiente</button>
+      <button type="submit" id="enviar" hidden>enviar</button>
+      <button type="button" id="cerrar">cerrar</button>
+    </nav>
+    <p class="cuenta"><span id="actual">1</span> / <span id="total"></span></p>
+  </form>
+
+  <div id="gracias" hidden>
+    <p>Listo.</p>
+    <p class="linea">Leo lo que escribiste y te escribo.</p>
+    <button class="entrada" onclick="modal.close()">cerrar</button>
+  </div>
+</dialog>
+
+<script>
+  const modal = document.getElementById('modal');
+  const form = document.getElementById('brief');
+  const pasos = [...form.querySelectorAll('.paso')];
+  const atras = document.getElementById('atras');
+  const siguiente = document.getElementById('siguiente');
+  const enviar = document.getElementById('enviar');
+  let i = 0;
+
+  document.getElementById('total').textContent = pasos.length;
+
+  function mostrar(n) {
+    pasos[i].hidden = true;
+    i = n;
+    pasos[i].hidden = false;
+    pasos[i].querySelector('textarea').focus();
+    atras.hidden = i === 0;
+    siguiente.hidden = i === pasos.length - 1;
+    enviar.hidden = i !== pasos.length - 1;
+    document.getElementById('actual').textContent = i + 1;
+  }
+
+  document.getElementById('abrir').addEventListener('click', () => {
+    modal.showModal();
+    mostrar(0);
+  });
+  document.getElementById('cerrar').addEventListener('click', () => modal.close());
+
+  siguiente.addEventListener('click', () => mostrar(i + 1));
+  atras.addEventListener('click', () => mostrar(i - 1));
+
+  // Enter avanza; Shift+Enter hace salto de línea.
+  form.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey && e.target.tagName === 'TEXTAREA') {
+      e.preventDefault();
+      if (i < pasos.length - 1) mostrar(i + 1);
+      else form.requestSubmit();
+    }
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    enviar.disabled = true;
+    const datos = Object.fromEntries(new FormData(form));
+    try {
+      const resp = await fetch('/api/public/brief', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(datos),
+      });
+      if (!resp.ok) throw new Error();
+      form.hidden = true;
+      document.getElementById('gracias').hidden = false;
+    } catch {
+      enviar.disabled = false;
+      alert('No se pudo enviar. Escribime a federicomoret23@gmail.com');
+    }
+  });
+</script>
 {% endblock %}

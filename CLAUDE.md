@@ -63,18 +63,20 @@ Al pasar un brief a prospección, las respuestas se vuelcan al `diagnostico` del
 
 ### Estética — continuación de Voider
 
-Visión hereda la estética de **Voider** (`z:\programming\hostinger voider`): fondo negro,
-blanco, una sola cosa en pantalla, sin nav, sin chrome, sin secciones. Acá se suma
-**Garamond** — el minimalismo es editorial, no de terminal.
+Visión hereda el método de **Voider** (`z:\programming\hostinger voider`): una sola cosa en
+pantalla, sin nav, sin chrome, sin secciones. Pero **invertido**: papel blanco, tinta negra,
+Garamond. El minimalismo es editorial, no de terminal.
 
 Reglas del front público:
 
-- Negro y blanco. Ningún otro color.
+- Blanco y negro. Ningún otro color.
 - Garamond en todo (`--garamond` en `public.css`, con cadena de fallback local; sin fuentes
-  externas).
-- Poquitas cosas. Si algo se puede sacar, se saca. El portal es un título, una lista de
-  trabajos y un link.
-- El formulario va **de a una pregunta por pantalla**, no como planilla. Enter avanza.
+  externas). Ojo: Garamond es del sistema, no una fuente web.
+- Poquitas cosas. Si algo se puede sacar, se saca.
+- **Lo primero que se ve es la cifra de trabajos hechos**, grande. Después la lista, después
+  el link.
+- El brief es un **modal** sobre el portal, no una página aparte, y va **de a una pregunta
+  por pantalla**. Enter avanza.
 
 **El admin no sigue esta estética.** Es una herramienta interna y prioriza densidad y
 legibilidad: sans-serif, fondo claro, tablas. No unificarlos.
@@ -128,10 +130,10 @@ Concreto:
 app.py              Rutas: sitio público, admin y APIs JSON
 models.py           Admin, Trabajo, Negocio, Contacto, Actividad, Brief + PREGUNTAS_BRIEF
 config.py           DevelopmentConfig (SQLite) / ProductionConfig (Postgres)
+seed.py             Carga los trabajos ya hechos en la vidriera
 templates/
   base.html         Layout público (mínimo: sin nav ni pie)
-  index.html        El portal: título, trabajos, "¿estás interesado?"
-  formulario.html   Brief de marca, una pregunta por pantalla
+  index.html        El portal (cifra, trabajos) + el modal del brief
   admin/
     base.html       Layout admin (lateral + main)
     login.html      Pantalla de login
@@ -140,7 +142,7 @@ templates/
     briefs.html     Briefs recibidos, con todas las respuestas
     trabajos.html   ABM de lo que se muestra en el portal
 static/
-  public.css        Negro, blanco, Garamond
+  public.css        Blanco, negro, Garamond
   admin.css         Design system del admin (claro, sans-serif)
   admin.js          Wrapper `api()` de fetch (inyecta CSRF, maneja 401) + `esc()`
 ```

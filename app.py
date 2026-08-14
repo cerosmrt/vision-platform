@@ -119,12 +119,7 @@ def home():
         .order_by(Trabajo.orden, Trabajo.id)
         .all()
     )
-    return render_template("index.html", trabajos=trabajos)
-
-
-@app.route("/formulario")
-def formulario():
-    return render_template("formulario.html", preguntas=PREGUNTAS_BRIEF)
+    return render_template("index.html", trabajos=trabajos, preguntas=PREGUNTAS_BRIEF)
 
 
 @app.route("/api/public/brief", methods=["POST"])
