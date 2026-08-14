@@ -159,3 +159,13 @@ dialog .acciones { display: flex; justify-content: flex-end; gap: .5rem; margin-
   .columnas { grid-template-columns: 1fr; }
   .principal { padding: 1.25rem; }
 }
+
+/* Briefs -------------------------------------------------------------- */
+.brief { margin-bottom: 1.25rem; }
+.brief.sin-leer { border-left: 3px solid var(--acento); }
+.brief-cabeza { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
+.brief-cabeza h2 { margin: 0; }
+.brief-cabeza .chico { margin: .2rem 0 0; }
+.respuestas { margin: 0; display: grid; gap: .8rem; }
+.respuestas dt { font-size: .82rem; color: var(--tinta-suave); }
+.respuestas dd { margin: .1rem 0 0; white-space: pre-wrap; }

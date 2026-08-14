@@ -3,25 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Visión — Desarrollo web a medida{% endblock %}</title>
-  <meta name="description" content="{% block description %}Desarrollo web a medida: sitios, catálogos, tiendas online y sistemas de gestión. Federico Moret.{% endblock %}">
+  <title>{% block title %}Visión{% endblock %}</title>
+  <meta name="description" content="{% block description %}Desarrollo web a medida. Federico Moret.{% endblock %}">
   <link rel="stylesheet" href="{{ url_for('static', filename='public.css') }}">
 </head>
 <body>
-  <header class="nav">
-    <a class="marca" href="{{ url_for('home') }}">Visión</a>
-    <nav>
-      <a href="#trabajos">Trabajos</a>
-      <a href="#contacto">Contacto</a>
-    </nav>
-  </header>
-
   {% block contenido %}{% endblock %}
-
-  <footer class="pie">
-    <p>Visión — Federico Moret</p>
-    <p><a href="mailto:federicomoret23@gmail.com">federicomoret23@gmail.com</a></p>
-    <p class="chico">© {{ anio }}</p>
-  </footer>
 </body>
 </html>

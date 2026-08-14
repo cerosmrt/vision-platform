@@ -193,30 +193,74 @@ class Actividad(db.Model):
         }
 
 
-class Consulta(db.Model):
-    """Lo que llega por el formulario público. Se puede convertir en Negocio."""
+# Las preguntas del brief, en orden. La clave es el campo en el modelo.
+# Se recorren de a una en el formulario público y se muestran juntas en el admin.
+PREGUNTAS_BRIEF = [
+    ("negocio", "¿Cómo se llama tu negocio?", None),
+    ("que_hace", "¿Qué hacés?", "En una frase, como se lo contarías a alguien en la calle."),
+    ("a_quien", "¿A quién le vendés?", "Quién es la persona que te compra. Cuanto más concreto, mejor."),
+    ("por_que_vos", "¿Por qué te eligen a vos y no al de al lado?", "Aunque te parezca obvio."),
+    ("como_habla", "Si tu marca fuera una persona, ¿cómo hablaría?", "Formal, cercana, seria, divertida, callada."),
+    ("referencias", "¿Qué marcas te gustan?", "De cualquier rubro. No hace falta que se parezcan a lo tuyo."),
+    ("que_no", "¿Qué NO querés parecer?", "A veces esto define más que lo anterior."),
+    ("colores", "¿Hay colores que sentís tuyos?", "Los que ya usás, o los que te gustaría usar. Si no sabés, dejalo vacío."),
+    ("que_tiene_hoy", "¿Qué tenés hoy?", "Instagram, una web vieja, nada. Pasame los links si hay."),
+    ("que_busca", "¿Qué querés que haga el que entra?", "Que te escriba, que compre, que vaya al local, que te conozca."),
+]
 
-    __tablename__ = "consulta"
+
+class Brief(db.Model):
+    """Lo que llega por el formulario público.
+
+    No es un "contacto": son las respuestas de marca del interesado. Es la materia
+    prima para entender su visión antes de expresarla en código y color.
+    Se puede convertir en Negocio para entrar al pipeline.
+    """
+
+    __tablename__ = "brief"
 
     id = db.Column(db.Integer, primary_key=True)
+
+    # Contacto
     nombre = db.Column(db.String(200))
-    negocio = db.Column(db.String(200))
     email = db.Column(db.String(200))
     telefono = db.Column(db.String(80))
-    mensaje = db.Column(db.Text)
-    leida = db.Column(db.Boolean, default=False)
+
+    # Marca — un campo por pregunta de PREGUNTAS_BRIEF
+    negocio = db.Column(db.String(200))
+    que_hace = db.Column(db.Text)
+    a_quien = db.Column(db.Text)
+    por_que_vos = db.Column(db.Text)
+    como_habla = db.Column(db.Text)
+    referencias = db.Column(db.Text)
+    que_no = db.Column(db.Text)
+    colores = db.Column(db.Text)
+    que_tiene_hoy = db.Column(db.Text)
+    que_busca = db.Column(db.Text)
+
+    leido = db.Column(db.Boolean, default=False)
     negocio_id = db.Column(db.Integer, db.ForeignKey("negocio.id"))
-    creada_en = db.Column(db.DateTime, default=ahora)
+    creado_en = db.Column(db.DateTime, default=ahora)
+
+    @property
+    def respuestas(self):
+        """Las preguntas contestadas, en orden, para mostrar en el admin."""
+        return [
+            (pregunta, getattr(self, campo))
+            for campo, pregunta, _ in PREGUNTAS_BRIEF
+            if getattr(self, campo)
+        ]
 
     def as_dict(self):
-        return {
+        datos = {
             "id": self.id,
             "nombre": self.nombre,
-            "negocio": self.negocio,
             "email": self.email,
             "telefono": self.telefono,
-            "mensaje": self.mensaje,
-            "leida": self.leida,
+            "leido": self.leido,
             "negocio_id": self.negocio_id,
-            "creada_en": self.creada_en.isoformat() if self.creada_en else None,
+            "creado_en": self.creado_en.isoformat() if self.creado_en else None,
         }
+        for campo, _, _ in PREGUNTAS_BRIEF:
+            datos[campo] = getattr(self, campo)
+        return datos

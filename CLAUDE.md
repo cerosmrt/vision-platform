@@ -39,14 +39,45 @@ decisión empuja hacia "esto sirve para cualquier negocio", va en contra de la p
 
 Dos caras en una misma app:
 
-- **Front público — la vidriera.** Muestra y linkea los trabajos hechos por Federico. Son
-  links a los sitios reales; las páginas de clientes **no** se alojan acá. Incluye un
-  formulario donde un interesado deja sus datos.
+- **Front público — el portal.** Dos pantallas y nada más: la lista de trabajos (links a los
+  sitios reales; las páginas de clientes **no** se alojan acá) y un "¿estás interesado?"
+  que lleva al formulario de marca.
 - **Back privado — el CRM de prospección.** Base de datos de posibles clientes. Federico
   investiga cada negocio, redacta el mail, lo manda y sigue la respuesta.
 
 Los leads entran por dos lados: los que llegan solos por el formulario y los que carga
 Federico al salir a buscar.
+
+### El formulario de marca (el brief)
+
+No es un formulario de contacto. Son preguntas sobre **la marca**: qué hace, a quién le
+vende, por qué lo eligen, cómo hablaría si fuera una persona, qué referencias le gustan, qué
+NO quiere parecer, qué colores siente suyos. Sirve para **entender y desarrollar la visión
+del cliente antes de expresarla en código, paletas y tipografía**.
+
+Las preguntas viven en `PREGUNTAS_BRIEF` (models.py) como lista ordenada de
+`(campo, pregunta, ayuda)`. Agregar o sacar una pregunta es tocar esa lista y el campo del
+modelo — el formulario público y la vista del admin se arman solos desde ahí.
+
+Al pasar un brief a prospección, las respuestas se vuelcan al `diagnostico` del negocio.
+
+### Estética — continuación de Voider
+
+Visión hereda la estética de **Voider** (`z:\programming\hostinger voider`): fondo negro,
+blanco, una sola cosa en pantalla, sin nav, sin chrome, sin secciones. Acá se suma
+**Garamond** — el minimalismo es editorial, no de terminal.
+
+Reglas del front público:
+
+- Negro y blanco. Ningún otro color.
+- Garamond en todo (`--garamond` en `public.css`, con cadena de fallback local; sin fuentes
+  externas).
+- Poquitas cosas. Si algo se puede sacar, se saca. El portal es un título, una lista de
+  trabajos y un link.
+- El formulario va **de a una pregunta por pantalla**, no como planilla. Enter avanza.
+
+**El admin no sigue esta estética.** Es una herramienta interna y prioriza densidad y
+legibilidad: sans-serif, fondo claro, tablas. No unificarlos.
 
 ### Decisiones ya tomadas
 
@@ -95,21 +126,22 @@ Concreto:
 
 ```
 app.py              Rutas: sitio público, admin y APIs JSON
-models.py           Admin, Trabajo, Negocio, Contacto, Actividad, Consulta
+models.py           Admin, Trabajo, Negocio, Contacto, Actividad, Brief + PREGUNTAS_BRIEF
 config.py           DevelopmentConfig (SQLite) / ProductionConfig (Postgres)
 templates/
-  base.html         Layout público
-  index.html        Vidriera: hero, servicios, trabajos, formulario
+  base.html         Layout público (mínimo: sin nav ni pie)
+  index.html        El portal: título, trabajos, "¿estás interesado?"
+  formulario.html   Brief de marca, una pregunta por pantalla
   admin/
     base.html       Layout admin (lateral + main)
     login.html      Pantalla de login
     index.html      Pipeline de prospección: conteos, filtros, tabla
     negocio.html    Ficha: datos, diagnóstico, borrador de mail, contactos, historial
-    consultas.html  Bandeja del formulario público
-    trabajos.html   ABM de la vidriera
+    briefs.html     Briefs recibidos, con todas las respuestas
+    trabajos.html   ABM de lo que se muestra en el portal
 static/
-  public.css        Estilos del sitio público
-  admin.css         Design system del admin
+  public.css        Negro, blanco, Garamond
+  admin.css         Design system del admin (claro, sans-serif)
   admin.js          Wrapper `api()` de fetch (inyecta CSRF, maneja 401) + `esc()`
 ```
 

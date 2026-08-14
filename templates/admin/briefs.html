@@ -1,0 +1,59 @@
+{% extends "admin/base.html" %}
+{% block title %}Briefs — Visión{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <h1>Briefs</h1>
+    <p class="sub">Lo que contestaron en el formulario de marca del sitio.</p>
+  </div>
+</header>
+
+{% for b in briefs %}
+  <section class="tarjeta brief {{ '' if b.leido else 'sin-leer' }}">
+    <header class="brief-cabeza">
+      <div>
+        <h2>{{ b.negocio or b.nombre or 'Sin nombre' }}</h2>
+        <p class="chico">
+          {{ b.nombre or '—' }} · {{ b.email or '' }} {{ b.telefono or '' }}
+          · {{ b.creado_en.strftime('%d/%m/%Y') if b.creado_en }}
+        </p>
+      </div>
+      <div class="acciones-celda">
+        {% if b.negocio_id %}
+          <a href="{{ url_for('admin_negocio', negocio_id=b.negocio_id) }}">Ver negocio</a>
+        {% else %}
+          <button class="secundario" onclick="convertir({{ b.id }})">Pasar a prospección</button>
+        {% endif %}
+        {% if not b.leido %}
+          <button class="secundario" onclick="marcarLeido({{ b.id }})">Marcar leído</button>
+        {% endif %}
+      </div>
+    </header>
+
+    <dl class="respuestas">
+      {% for pregunta, respuesta in b.respuestas %}
+        <dt>{{ pregunta }}</dt>
+        <dd>{{ respuesta }}</dd>
+      {% else %}
+        <dd class="vacio">No contestó ninguna pregunta.</dd>
+      {% endfor %}
+    </dl>
+  </section>
+{% else %}
+  <p class="vacio">Todavía no llegó ningún brief.</p>
+{% endfor %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  async function convertir(id) {
+    const negocio = await api(`/api/briefs/${id}/convertir`, { method: 'POST' });
+    if (negocio) location.href = '/admin/negocio/' + negocio.id;
+  }
+
+  async function marcarLeido(id) {
+    if (await api(`/api/briefs/${id}/leido`, { method: 'PATCH' })) location.reload();
+  }
+</script>
+{% endblock %}

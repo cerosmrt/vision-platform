@@ -18,10 +18,11 @@ from flask_migrate import Migrate
 from config import get_config
 from models import (
     ESTADOS,
+    PREGUNTAS_BRIEF,
     TIPOS_ACTIVIDAD,
     Actividad,
     Admin,
-    Consulta,
+    Brief,
     Contacto,
     Negocio,
     Trabajo,
@@ -104,6 +105,8 @@ CAMPOS_NEGOCIO = [
     "borrador_mail", "notas",
 ]
 
+CAMPOS_BRIEF = ["nombre", "email", "telefono"] + [c for c, _, _ in PREGUNTAS_BRIEF]
+
 
 # --------------------------------------------------------------------------
 # Sitio público — la vidriera
@@ -119,20 +122,20 @@ def home():
     return render_template("index.html", trabajos=trabajos)
 
 
-@app.route("/api/public/consulta", methods=["POST"])
-def crear_consulta():
+@app.route("/formulario")
+def formulario():
+    return render_template("formulario.html", preguntas=PREGUNTAS_BRIEF)
+
+
+@app.route("/api/public/brief", methods=["POST"])
+def crear_brief():
     datos = request.get_json(silent=True) or request.form
     if not (datos.get("nombre") or datos.get("email")):
         return jsonify({"error": "faltan datos"}), 400
 
-    consulta = Consulta(
-        nombre=(datos.get("nombre") or "").strip() or None,
-        negocio=(datos.get("negocio") or "").strip() or None,
-        email=(datos.get("email") or "").strip() or None,
-        telefono=(datos.get("telefono") or "").strip() or None,
-        mensaje=(datos.get("mensaje") or "").strip() or None,
-    )
-    db.session.add(consulta)
+    brief = Brief()
+    _campos(brief, datos, CAMPOS_BRIEF)
+    db.session.add(brief)
     db.session.commit()
     return jsonify({"ok": True}), 201
 
@@ -188,7 +191,7 @@ def admin_index():
     rubros = sorted(
         {n.rubro for n in Negocio.query.filter(Negocio.rubro.isnot(None)).all()}
     )
-    sin_leer = Consulta.query.filter_by(leida=False).count()
+    sin_leer = Brief.query.filter_by(leido=False).count()
 
     return render_template(
         "admin/index.html",
@@ -206,11 +209,11 @@ def admin_negocio(negocio_id):
     return render_template("admin/negocio.html", negocio=negocio_o_404(negocio_id))
 
 
-@app.route("/admin/consultas")
+@app.route("/admin/briefs")
 @login_required
-def admin_consultas():
-    consultas = Consulta.query.order_by(Consulta.creada_en.desc()).all()
-    return render_template("admin/consultas.html", consultas=consultas)
+def admin_briefs():
+    briefs = Brief.query.order_by(Brief.creado_en.desc()).all()
+    return render_template("admin/briefs.html", briefs=briefs)
 
 
 @app.route("/admin/trabajos")
@@ -307,52 +310,58 @@ def api_borrar_contacto(contacto_id):
 
 
 # --------------------------------------------------------------------------
-# API admin — consultas y trabajos
+# API admin — briefs y trabajos
 # --------------------------------------------------------------------------
 
-@app.route("/api/consultas/<int:consulta_id>/leida", methods=["PATCH"])
+@app.route("/api/briefs/<int:brief_id>/leido", methods=["PATCH"])
 @api_login_required
-def api_marcar_leida(consulta_id):
-    consulta = db.session.get(Consulta, consulta_id)
-    if not consulta:
+def api_marcar_leido(brief_id):
+    brief = db.session.get(Brief, brief_id)
+    if not brief:
         abort(404)
-    consulta.leida = True
+    brief.leido = True
     db.session.commit()
-    return jsonify(consulta.as_dict())
+    return jsonify(brief.as_dict())
 
 
-@app.route("/api/consultas/<int:consulta_id>/convertir", methods=["POST"])
+@app.route("/api/briefs/<int:brief_id>/convertir", methods=["POST"])
 @api_login_required
-def api_convertir_consulta(consulta_id):
-    """Una consulta del formulario pasa a ser un negocio del pipeline."""
-    consulta = db.session.get(Consulta, consulta_id)
-    if not consulta:
+def api_convertir_brief(brief_id):
+    """Un brief del formulario pasa a ser un negocio del pipeline.
+
+    Las respuestas de marca se vuelcan al diagnóstico: es lo que el interesado
+    contó de sí mismo, y es de donde arranca la propuesta.
+    """
+    brief = db.session.get(Brief, brief_id)
+    if not brief:
         abort(404)
-    if consulta.negocio_id:
-        return jsonify({"error": "ya fue convertida"}), 400
+    if brief.negocio_id:
+        return jsonify({"error": "ya fue convertido"}), 400
+
+    diagnostico = "\n\n".join(f"{p}\n{r}" for p, r in brief.respuestas)
 
     negocio = Negocio(
-        nombre=consulta.negocio or consulta.nombre or "Sin nombre",
-        email=consulta.email,
-        telefono=consulta.telefono,
+        nombre=brief.negocio or brief.nombre or "Sin nombre",
+        email=brief.email,
+        telefono=brief.telefono,
         origen="formulario",
         estado="respondio",
-        notas=consulta.mensaje,
+        diagnostico=diagnostico or None,
     )
     db.session.add(negocio)
     db.session.flush()
 
-    if consulta.nombre:
+    if brief.nombre:
         db.session.add(
-            Contacto(negocio_id=negocio.id, nombre=consulta.nombre,
-                     email=consulta.email, telefono=consulta.telefono)
+            Contacto(negocio_id=negocio.id, nombre=brief.nombre,
+                     email=brief.email, telefono=brief.telefono)
         )
     db.session.add(
         Actividad(negocio_id=negocio.id, tipo="nota",
-                  detalle="Llegó por el formulario del sitio")
+                  detalle="Llenó el formulario de marca del sitio")
     )
-    consulta.negocio_id = negocio.id
-    consulta.leida = True
+    brief.negocio_id = negocio.id
+    brief.leido = True
     db.session.commit()
     return jsonify(negocio.as_dict()), 201
 

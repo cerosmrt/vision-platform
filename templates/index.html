@@ -1,87 +1,25 @@
 {% extends "base.html" %}
 
 {% block contenido %}
-<section class="hero">
-  <h1>Tu negocio, online, hecho a tu medida.</h1>
-  <p class="bajada">
-    Sitios web, catálogos, tiendas con pagos y sistemas de gestión. No trabajo con
-    plantillas: primero entiendo cómo funciona tu negocio y después construyo lo que
-    necesita, que muchas veces es menos de lo que se cree.
-  </p>
-  <a class="boton" href="#contacto">Charlemos 15 minutos</a>
-</section>
+<main class="portal">
+  <h1>Visión</h1>
+  <p class="linea">Desarrollo web a medida.</p>
 
-<section class="servicios">
-  <article>
-    <h3>Sitios y catálogos</h3>
-    <p>Que te encuentren en Google, que sepan qué vendés y cómo llegar a vos.</p>
-  </article>
-  <article>
-    <h3>Tiendas online</h3>
-    <p>Catálogo, carrito, pagos, stock y envíos. Vender sin depender de un mensaje.</p>
-  </article>
-  <article>
-    <h3>Sistemas a medida</h3>
-    <p>La parte que no se ve: ventas, inventario, clientes, caja. Lo que hoy hacés en papel.</p>
-  </article>
-</section>
-
-<section id="trabajos" class="trabajos">
-  <h2>Trabajos</h2>
   {% if trabajos %}
-    <div class="grilla">
+    <ul class="obras">
       {% for t in trabajos %}
-        <article class="trabajo">
-          {% if t.imagen %}<img src="{{ t.imagen }}" alt="{{ t.nombre }}" loading="lazy">{% endif %}
-          <h3>{{ t.nombre }}</h3>
-          {% if t.bajada %}<p class="bajada">{{ t.bajada }}</p>{% endif %}
-          {% if t.descripcion %}<p>{{ t.descripcion }}</p>{% endif %}
-          {% if t.stack %}<p class="stack">{{ t.stack }}</p>{% endif %}
-          {% if t.url %}<a class="link" href="{{ t.url }}" target="_blank" rel="noopener">Ver el sitio →</a>{% endif %}
-        </article>
+        <li>
+          {% if t.url %}
+            <a href="{{ t.url }}" target="_blank" rel="noopener">{{ t.nombre }}</a>
+          {% else %}
+            <span>{{ t.nombre }}</span>
+          {% endif %}
+          {% if t.bajada %}<em>{{ t.bajada }}</em>{% endif %}
+        </li>
       {% endfor %}
-    </div>
-  {% else %}
-    <p class="vacio">Todavía no hay trabajos cargados.</p>
+    </ul>
   {% endif %}
-</section>
 
-<section id="contacto" class="contacto">
-  <h2>Contame qué necesitás</h2>
-  <p class="bajada">Dejame tus datos y te escribo. Sin compromiso y sin costo.</p>
-  <form id="form-contacto">
-    <label>Tu nombre <input name="nombre" required></label>
-    <label>Tu negocio <input name="negocio"></label>
-    <label>Email <input name="email" type="email" required></label>
-    <label>Teléfono <input name="telefono"></label>
-    <label>¿Qué necesitás? <textarea name="mensaje" rows="4"></textarea></label>
-    <button type="submit">Enviar</button>
-    <p class="aviso" id="aviso" hidden></p>
-  </form>
-</section>
-
-<script>
-  document.getElementById('form-contacto').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const boton = e.target.querySelector('button');
-    const aviso = document.getElementById('aviso');
-    boton.disabled = true;
-
-    const datos = Object.fromEntries(new FormData(e.target));
-    try {
-      const resp = await fetch('/api/public/consulta', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(datos),
-      });
-      if (!resp.ok) throw new Error();
-      e.target.reset();
-      aviso.textContent = 'Listo, te escribo a la brevedad.';
-    } catch {
-      aviso.textContent = 'No se pudo enviar. Escribime a federicomoret23@gmail.com';
-    }
-    aviso.hidden = false;
-    boton.disabled = false;
-  });
-</script>
+  <a class="entrada" href="{{ url_for('formulario') }}">¿estás interesado?</a>
+</main>
 {% endblock %}

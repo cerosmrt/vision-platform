@@ -5,7 +5,7 @@
   <div>
     <h1>Prospección</h1>
     <p class="sub">{{ negocios|length }} negocio{{ '' if negocios|length == 1 else 's' }}
-      {%- if sin_leer %} · <a href="{{ url_for('admin_consultas') }}">{{ sin_leer }} consulta{{ '' if sin_leer == 1 else 's' }} sin leer</a>{% endif %}</p>
+      {%- if sin_leer %} · <a href="{{ url_for('admin_briefs') }}">{{ sin_leer }} brief{{ '' if sin_leer == 1 else 's' }} sin leer</a>{% endif %}</p>
   </div>
   <button onclick="abrirNuevoNegocio()">+ Nuevo negocio</button>
 </header>
