@@ -63,19 +63,16 @@ Al pasar un brief a prospección, las respuestas se vuelcan al `diagnostico` del
 
 ### Estética
 
-Hereda el **método** de Voider (`z:\programming\hostinger voider`): una sola cosa en
-pantalla, sin nav, sin secciones. Y el **sistema tipográfico y de color** que Federico ya
-escribió para Etérea (`Eterea_Pagina_Web/src/app/globals.css`), que es la fuente de verdad
-de su gusto. Reglas que salen de ahí y son innegociables:
+Negro, blanco y **Garamond**. Continuación de **Voider**
+(`z:\programming\hostinger voider`): una sola cosa en pantalla, sin nav, sin secciones, sin
+chrome. Poquitas cosas y mucho aire.
 
-- **Nunca blanco puro ni negro absoluto.** Papel `#f7f6f3`, tinta `#26241f`. El `#fff` sobre
-  `#000` se ve duro y barato — ya se probó y se descartó.
-- **Serif para lo que se lee de un vistazo, sans para el cuerpo.** Garamond en títulos y
-  cifras; sans de sistema en párrafos, ayudas y controles. Nunca serif en todo.
-- **Escala contenida.** Display máximo ~3.4rem. Federico ya redujo su escala un 80% en
-  Etérea porque "todo se veía muy grande": no repetir el error con números gigantes.
-- Interlineado 1.65, `text-wrap: balance` en títulos y `pretty` en párrafos.
-- Blanco y negro para Visión: sin color de acento. La calidez viene del papel, no del color.
+- Fondo `#0b0b0b`, texto `#f2f2f0`, apagado `#8a8a86`, filete `#262624`.
+- Garamond en todo. Sin fuentes externas: cadena de fallback local.
+- Sin color de acento. Ninguno.
+- **Escala contenida.** Nada de números ni títulos gigantes: la jerarquía se hace con
+  espacio en blanco y con el gris, no con tamaño.
+- Interlineado 1.7. Aire generoso entre bloques (4.5rem entre secciones).
 
 Del contenido:
 
@@ -86,6 +83,9 @@ Del contenido:
 
 **El admin no sigue esta estética.** Es herramienta interna y prioriza densidad: sans-serif,
 fondo claro, tablas. No unificarlos.
+
+**No traer decisiones de diseño de otros proyectos.** Etérea y Moret son marcas de clientes;
+Visión es la marca de Federico y se define sola.
 
 ### Decisiones ya tomadas
 

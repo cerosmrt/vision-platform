@@ -1,21 +1,12 @@
-/* Visión — sistema de marca.
-   Sigue las reglas del sistema de Etérea: nunca blanco puro ni negro absoluto,
-   serif para lo que se lee de un vistazo y sans para el cuerpo, escala contenida
-   e interlineado generoso. El minimalismo es editorial, no de terminal. */
+/* Visión — negro, blanco, Garamond. Poquitas cosas, mucho aire. */
 
 :root {
-  --papel: #f7f6f3;
-  --papel-hondo: #efede8;
-  --tinta: #26241f;
-  --tinta-suave: #6f6a62;
-  --linea: #d9d5cd;
-
-  --serif: Garamond, "EB Garamond", "Adobe Garamond Pro", Baskerville,
-           "Libre Baskerville", Georgia, serif;
-  --sans: "Mulish", "Nunito Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-
-  --display: clamp(2rem, 5vw, 3.4rem);
-  --titulo: clamp(1.2rem, 2.4vw, 1.5rem);
+  --fondo: #0b0b0b;
+  --texto: #f2f2f0;
+  --apagado: #8a8a86;
+  --linea: #262624;
+  --garamond: Garamond, "EB Garamond", "Adobe Garamond Pro", Baskerville,
+              Georgia, "Times New Roman", serif;
 }
 
 * { box-sizing: border-box; }
@@ -23,176 +14,151 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--papel);
-  color: var(--tinta);
-  font-family: var(--sans);
-  font-size: 16px;
-  line-height: 1.65;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: var(--garamond);
+  font-size: 18px;
+  line-height: 1.7;
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 3rem 1.5rem;
+  padding: 4rem 2rem;
 }
 
-h1, h2 {
-  font-family: var(--serif);
-  font-weight: 400;
-  letter-spacing: .01em;
-  text-wrap: balance;
-  margin: 0;
-}
-p { text-wrap: pretty; }
-::selection { background: var(--papel-hondo); }
-
+h1, h2 { font-weight: 400; margin: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
 a { color: inherit; text-decoration: none; }
+::selection { background: var(--texto); color: var(--fondo); }
 
 /* Portal --------------------------------------------------------------- */
-.portal { width: 100%; max-width: 44rem; }
+.portal {
+  width: 100%;
+  max-width: 38rem;
+  margin-inline: auto;
+}
 
-/* Lo primero que se lee: cuántos trabajos hay hechos. */
 .cuenta-trabajos {
-  font-family: var(--serif);
-  font-size: var(--display);
-  line-height: 1.1;
-  letter-spacing: .01em;
-  margin: 0 0 3.5rem;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  line-height: 1.25;
+  margin-bottom: 4.5rem;
 }
 .cuenta-trabajos .cifra { font-variant-numeric: lining-nums; }
 
 /* Obras ---------------------------------------------------------------- */
 .obras { list-style: none; padding: 0; margin: 0; }
-
-.obras li {
-  padding: 1.5rem 0;
-  border-top: 1px solid var(--linea);
-}
+.obras li { padding: 2rem 0; border-top: 1px solid var(--linea); }
 .obras li:last-child { border-bottom: 1px solid var(--linea); }
 
 .obras h2 {
-  font-size: var(--titulo);
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-}
-.obras h2 .ver {
-  font-family: var(--sans);
-  font-size: .8rem;
-  color: var(--tinta-suave);
-  letter-spacing: .04em;
-  border-bottom: 1px solid var(--linea);
-  white-space: nowrap;
-}
-.obras h2 .ver:hover { color: var(--tinta); border-bottom-color: var(--tinta); }
-
-.obras p { margin: .35rem 0 0; color: var(--tinta-suave); max-width: 52ch; }
-.obras .stack {
-  margin-top: .5rem;
-  font-size: .78rem;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: var(--tinta-suave);
-}
-
-/* Pie ------------------------------------------------------------------ */
-.pie {
+  font-size: 1.35rem;
+  letter-spacing: .01em;
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 1.5rem;
+}
+.obras .ver {
+  font-size: .82rem;
+  letter-spacing: .1em;
+  text-transform: lowercase;
+  color: var(--apagado);
+  white-space: nowrap;
+}
+.obras .ver:hover { color: var(--texto); }
+
+.obras p { color: var(--apagado); font-size: .95rem; margin-top: .4rem; max-width: 46ch; }
+.obras .stack { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; margin-top: .8rem; }
+
+/* Pie ------------------------------------------------------------------ */
+.pie {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
   flex-wrap: wrap;
-  margin-top: 3.5rem;
+  margin-top: 4.5rem;
 }
-.pie .marca {
-  font-family: var(--serif);
-  font-size: 1.1rem;
-  letter-spacing: .12em;
-  text-transform: uppercase;
+.marca { font-size: 1.15rem; letter-spacing: .3em; text-transform: uppercase; }
+.marca span {
+  display: block;
+  font-size: .8rem;
+  letter-spacing: .04em;
+  text-transform: none;
+  color: var(--apagado);
+  margin-top: .3rem;
 }
-.pie .marca span { display: block; font-family: var(--sans); font-size: .78rem; letter-spacing: .04em; text-transform: none; color: var(--tinta-suave); }
 
 .entrada {
-  background: var(--tinta);
-  color: var(--papel);
-  border: 0;
-  border-radius: 2px;
-  font-family: var(--sans);
-  font-size: .9rem;
-  letter-spacing: .02em;
-  padding: .7rem 1.4rem;
+  background: transparent;
+  color: var(--texto);
+  border: 1px solid var(--linea);
+  font-family: var(--garamond);
+  font-size: .95rem;
+  padding: .65rem 1.5rem;
   cursor: pointer;
-  transition: opacity .15s;
+  transition: border-color .2s;
 }
-.entrada:hover { opacity: .82; }
+.entrada:hover { border-color: var(--apagado); }
 
 /* Modal del brief ------------------------------------------------------ */
 dialog {
-  background: var(--papel);
-  color: var(--tinta);
+  background: var(--fondo);
+  color: var(--texto);
   border: 1px solid var(--linea);
-  border-radius: 3px;
-  padding: clamp(1.75rem, 4vw, 2.75rem);
-  width: min(40rem, 92vw);
+  padding: clamp(2rem, 5vw, 3.5rem);
+  width: min(36rem, 92vw);
   max-height: 86vh;
   margin: auto;
 }
-dialog::backdrop { background: rgba(38, 36, 31, .3); }
+dialog::backdrop { background: rgba(0, 0, 0, .82); }
 
 .paso label {
   display: block;
-  font-family: var(--serif);
-  font-size: clamp(1.35rem, 3vw, 1.85rem);
-  line-height: 1.2;
+  font-size: clamp(1.35rem, 3vw, 1.8rem);
+  line-height: 1.3;
   text-wrap: balance;
-  margin-bottom: .35rem;
+  margin-bottom: .4rem;
 }
-.ayuda { color: var(--tinta-suave); margin: 0 0 1.75rem; font-size: .9rem; }
+.ayuda { color: var(--apagado); font-size: .9rem; margin-bottom: 2rem; }
 
 textarea {
   width: 100%;
   background: transparent;
-  color: var(--tinta);
+  color: var(--texto);
   border: 0;
   border-bottom: 1px solid var(--linea);
-  font-family: var(--sans);
-  font-size: 1rem;
-  line-height: 1.65;
+  font-family: var(--garamond);
+  font-size: 1.05rem;
+  line-height: 1.7;
   padding: .5rem 0;
   resize: none;
   outline: none;
-  margin-bottom: .75rem;
+  margin-bottom: 1rem;
 }
-textarea:focus { border-bottom-color: var(--tinta); }
-textarea::placeholder { color: #b3aea6; }
+textarea:focus { border-bottom-color: var(--apagado); }
+textarea::placeholder { color: #4a4a47; }
 
-.pasos { display: flex; align-items: center; gap: 1.25rem; margin-top: 2rem; }
+.pasos { display: flex; align-items: center; gap: 1.75rem; margin-top: 2.5rem; }
 .pasos #cerrar { margin-left: auto; }
 .pasos button {
   background: transparent;
-  color: var(--tinta-suave);
+  color: var(--apagado);
   border: 0;
-  font-family: var(--sans);
-  font-size: .9rem;
+  font-family: var(--garamond);
+  font-size: .95rem;
   padding: 0;
   cursor: pointer;
 }
-.pasos button:hover { color: var(--tinta); }
-.pasos #enviar, .pasos #siguiente { color: var(--tinta); font-weight: 600; }
+.pasos button:hover { color: var(--texto); }
+.pasos #siguiente, .pasos #enviar { color: var(--texto); }
 .pasos button:disabled { opacity: .4; cursor: default; }
 
-.cuenta {
-  margin-top: 1.75rem;
-  font-size: .75rem;
-  letter-spacing: .1em;
-  color: var(--tinta-suave);
-}
+.cuenta { margin-top: 2rem; font-size: .72rem; letter-spacing: .2em; color: #454542; }
 
-#gracias h2 { font-size: var(--display); }
-#gracias p { color: var(--tinta-suave); margin: .5rem 0 2rem; }
+#gracias h2 { font-size: clamp(1.6rem, 4vw, 2.2rem); }
+#gracias p { color: var(--apagado); margin: .5rem 0 2.5rem; }
 
 @media (max-width: 560px) {
-  body { padding: 2rem 1.25rem; align-items: flex-start; }
-  .obras h2 { flex-direction: column; gap: .2rem; }
+  body { padding: 2.5rem 1.5rem; align-items: flex-start; }
+  .obras h2 { flex-direction: column; gap: .3rem; }
 }
