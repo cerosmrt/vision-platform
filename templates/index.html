@@ -2,25 +2,28 @@
 
 {% block contenido %}
 <main class="portal">
-  <p class="cifra">{{ trabajos|length }}</p>
-  <p class="cifra-pie">trabajo{{ '' if trabajos|length == 1 else 's' }} hecho{{ '' if trabajos|length == 1 else 's' }}</p>
+  <p class="cuenta-trabajos">
+    <span class="cifra">{{ trabajos|length }}</span>
+    trabajo{{ '' if trabajos|length == 1 else 's' }} hecho{{ '' if trabajos|length == 1 else 's' }}.
+  </p>
 
-  {% if trabajos %}
-    <ul class="obras">
-      {% for t in trabajos %}
-        <li>
-          {% if t.url %}
-            <a href="{{ t.url }}" target="_blank" rel="noopener">{{ t.nombre }}</a>
-          {% else %}
-            <span>{{ t.nombre }}</span>
-          {% endif %}
-          {% if t.bajada %}<em>{{ t.bajada }}</em>{% endif %}
-        </li>
-      {% endfor %}
-    </ul>
-  {% endif %}
+  <ul class="obras">
+    {% for t in trabajos %}
+      <li>
+        <h2>
+          {{ t.nombre }}
+          {% if t.url %}<a class="ver" href="{{ t.url }}" target="_blank" rel="noopener">ver el sitio</a>{% endif %}
+        </h2>
+        {% if t.bajada %}<p>{{ t.bajada }}</p>{% endif %}
+        {% if t.stack %}<p class="stack">{{ t.stack }}</p>{% endif %}
+      </li>
+    {% endfor %}
+  </ul>
 
-  <button class="entrada" id="abrir">¿estás interesado?</button>
+  <div class="pie">
+    <p class="marca">Visión<span>Desarrollo web a medida.</span></p>
+    <button class="entrada" id="abrir">¿estás interesado?</button>
+  </div>
 </main>
 
 <dialog id="modal">
@@ -36,7 +39,7 @@
     <fieldset class="paso" hidden>
       <label for="c-nombre">¿Cómo te llamás?</label>
       <p class="ayuda">Y por dónde te escribo.</p>
-      <textarea id="c-nombre" name="nombre" rows="1" required></textarea>
+      <textarea id="c-nombre" name="nombre" rows="1" placeholder="nombre" required></textarea>
       <textarea name="email" rows="1" placeholder="email" required></textarea>
       <textarea name="telefono" rows="1" placeholder="teléfono"></textarea>
     </fieldset>
@@ -51,8 +54,8 @@
   </form>
 
   <div id="gracias" hidden>
-    <p>Listo.</p>
-    <p class="linea">Leo lo que escribiste y te escribo.</p>
+    <h2>Listo.</h2>
+    <p>Leo lo que escribiste y te escribo.</p>
     <button class="entrada" onclick="modal.close()">cerrar</button>
   </div>
 </dialog>

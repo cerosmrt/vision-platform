@@ -1,125 +1,198 @@
-/* Visión — el minimalismo de Voider, en clave editorial.
-   Papel blanco, tinta negra, Garamond. Una sola cosa por pantalla. */
+/* Visión — sistema de marca.
+   Sigue las reglas del sistema de Etérea: nunca blanco puro ni negro absoluto,
+   serif para lo que se lee de un vistazo y sans para el cuerpo, escala contenida
+   e interlineado generoso. El minimalismo es editorial, no de terminal. */
 
 :root {
-  --papel: #fff;
-  --tinta: #111;
-  --gris: #767676;
-  --tenue: #ddd;
-  --garamond: Garamond, "EB Garamond", "Adobe Garamond Pro", "Cormorant Garamond",
-               Baskerville, "Times New Roman", serif;
+  --papel: #f7f6f3;
+  --papel-hondo: #efede8;
+  --tinta: #26241f;
+  --tinta-suave: #6f6a62;
+  --linea: #d9d5cd;
+
+  --serif: Garamond, "EB Garamond", "Adobe Garamond Pro", Baskerville,
+           "Libre Baskerville", Georgia, serif;
+  --sans: "Mulish", "Nunito Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --display: clamp(2rem, 5vw, 3.4rem);
+  --titulo: clamp(1.2rem, 2.4vw, 1.5rem);
 }
 
 * { box-sizing: border-box; }
 
-html, body { height: 100%; }
-
 body {
   margin: 0;
+  min-height: 100vh;
   background: var(--papel);
   color: var(--tinta);
-  font-family: var(--garamond);
-  font-size: clamp(17px, 1.6vw, 20px);
-  line-height: 1.6;
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem 1.5rem;
+  padding: 3rem 1.5rem;
 }
 
-a { color: var(--tinta); text-decoration: none; border-bottom: 1px solid var(--tenue); }
-a:hover { border-bottom-color: var(--tinta); }
+h1, h2 {
+  font-family: var(--serif);
+  font-weight: 400;
+  letter-spacing: .01em;
+  text-wrap: balance;
+  margin: 0;
+}
+p { text-wrap: pretty; }
+::selection { background: var(--papel-hondo); }
 
-::selection { background: var(--tinta); color: var(--papel); }
+a { color: inherit; text-decoration: none; }
 
 /* Portal --------------------------------------------------------------- */
-.portal { width: min(46ch, 100%); }
+.portal { width: 100%; max-width: 44rem; }
 
-/* Lo primero que se ve: cuántos trabajos hay hechos. */
-.cifra {
-  font-size: clamp(6rem, 22vw, 12rem);
-  line-height: .85;
-  margin: 0;
-  letter-spacing: -.04em;
-  font-variant-numeric: lining-nums;
+/* Lo primero que se lee: cuántos trabajos hay hechos. */
+.cuenta-trabajos {
+  font-family: var(--serif);
+  font-size: var(--display);
+  line-height: 1.1;
+  letter-spacing: .01em;
+  margin: 0 0 3.5rem;
 }
-.cifra-pie { color: var(--gris); font-style: italic; margin: .75rem 0 0; }
+.cuenta-trabajos .cifra { font-variant-numeric: lining-nums; }
 
-.linea { color: var(--gris); margin: .25rem 0 0; font-style: italic; }
+/* Obras ---------------------------------------------------------------- */
+.obras { list-style: none; padding: 0; margin: 0; }
 
-.obras { list-style: none; padding: 0; margin: 4rem 0; }
-.obras li { margin-bottom: 1rem; }
-.obras em { display: block; color: var(--gris); font-size: .85em; font-style: italic; }
+.obras li {
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--linea);
+}
+.obras li:last-child { border-bottom: 1px solid var(--linea); }
+
+.obras h2 {
+  font-size: var(--titulo);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.obras h2 .ver {
+  font-family: var(--sans);
+  font-size: .8rem;
+  color: var(--tinta-suave);
+  letter-spacing: .04em;
+  border-bottom: 1px solid var(--linea);
+  white-space: nowrap;
+}
+.obras h2 .ver:hover { color: var(--tinta); border-bottom-color: var(--tinta); }
+
+.obras p { margin: .35rem 0 0; color: var(--tinta-suave); max-width: 52ch; }
+.obras .stack {
+  margin-top: .5rem;
+  font-size: .78rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+}
+
+/* Pie ------------------------------------------------------------------ */
+.pie {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 3.5rem;
+}
+.pie .marca {
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.pie .marca span { display: block; font-family: var(--sans); font-size: .78rem; letter-spacing: .04em; text-transform: none; color: var(--tinta-suave); }
 
 .entrada {
-  display: inline-block;
-  margin-top: 2rem;
-  background: transparent;
-  color: var(--tinta);
+  background: var(--tinta);
+  color: var(--papel);
   border: 0;
-  border-bottom: 1px solid var(--gris);
-  font-family: var(--garamond);
-  font-size: 1em;
-  padding: 0 0 .1rem;
+  border-radius: 2px;
+  font-family: var(--sans);
+  font-size: .9rem;
+  letter-spacing: .02em;
+  padding: .7rem 1.4rem;
   cursor: pointer;
+  transition: opacity .15s;
 }
-.entrada:hover { border-bottom-color: var(--tinta); }
+.entrada:hover { opacity: .82; }
 
 /* Modal del brief ------------------------------------------------------ */
 dialog {
   background: var(--papel);
   color: var(--tinta);
-  border: 1px solid var(--tenue);
-  padding: clamp(1.75rem, 5vw, 3rem);
-  width: min(52ch, 92vw);
-  max-height: 88vh;
+  border: 1px solid var(--linea);
+  border-radius: 3px;
+  padding: clamp(1.75rem, 4vw, 2.75rem);
+  width: min(40rem, 92vw);
+  max-height: 86vh;
   margin: auto;
 }
-dialog::backdrop { background: rgba(255, 255, 255, .8); }
+dialog::backdrop { background: rgba(38, 36, 31, .3); }
 
 .paso label {
   display: block;
-  font-size: clamp(1.4rem, 4vw, 1.9rem);
-  line-height: 1.25;
-  margin-bottom: .5rem;
+  font-family: var(--serif);
+  font-size: clamp(1.35rem, 3vw, 1.85rem);
+  line-height: 1.2;
+  text-wrap: balance;
+  margin-bottom: .35rem;
 }
-
-.ayuda { color: var(--gris); font-style: italic; margin: 0 0 1.5rem; font-size: .95em; }
+.ayuda { color: var(--tinta-suave); margin: 0 0 1.75rem; font-size: .9rem; }
 
 textarea {
   width: 100%;
   background: transparent;
   color: var(--tinta);
   border: 0;
-  border-bottom: 1px solid var(--tenue);
-  font-family: var(--garamond);
-  font-size: 1em;
-  line-height: 1.6;
+  border-bottom: 1px solid var(--linea);
+  font-family: var(--sans);
+  font-size: 1rem;
+  line-height: 1.65;
   padding: .5rem 0;
   resize: none;
   outline: none;
-  margin-bottom: 1rem;
+  margin-bottom: .75rem;
 }
 textarea:focus { border-bottom-color: var(--tinta); }
-textarea::placeholder { color: #bbb; font-style: italic; }
+textarea::placeholder { color: #b3aea6; }
 
-.pasos { display: flex; gap: 1.5rem; margin-top: 2rem; }
+.pasos { display: flex; align-items: center; gap: 1.25rem; margin-top: 2rem; }
 .pasos #cerrar { margin-left: auto; }
-
 .pasos button {
   background: transparent;
-  color: var(--gris);
+  color: var(--tinta-suave);
   border: 0;
-  border-bottom: 1px solid transparent;
-  font-family: var(--garamond);
-  font-size: 1em;
+  font-family: var(--sans);
+  font-size: .9rem;
   padding: 0;
   cursor: pointer;
 }
-.pasos button:hover { color: var(--tinta); border-bottom-color: var(--tinta); }
+.pasos button:hover { color: var(--tinta); }
+.pasos #enviar, .pasos #siguiente { color: var(--tinta); font-weight: 600; }
 .pasos button:disabled { opacity: .4; cursor: default; }
 
-.cuenta { color: #bbb; font-size: .8em; margin-top: 2rem; letter-spacing: .1em; }
+.cuenta {
+  margin-top: 1.75rem;
+  font-size: .75rem;
+  letter-spacing: .1em;
+  color: var(--tinta-suave);
+}
 
-#gracias p { margin: 0; font-size: clamp(1.4rem, 4vw, 1.9rem); }
-#gracias .linea { font-size: 1rem; }
+#gracias h2 { font-size: var(--display); }
+#gracias p { color: var(--tinta-suave); margin: .5rem 0 2rem; }
+
+@media (max-width: 560px) {
+  body { padding: 2rem 1.25rem; align-items: flex-start; }
+  .obras h2 { flex-direction: column; gap: .2rem; }
+}

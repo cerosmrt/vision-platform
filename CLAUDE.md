@@ -61,25 +61,31 @@ modelo — el formulario público y la vista del admin se arman solos desde ahí
 
 Al pasar un brief a prospección, las respuestas se vuelcan al `diagnostico` del negocio.
 
-### Estética — continuación de Voider
+### Estética
 
-Visión hereda el método de **Voider** (`z:\programming\hostinger voider`): una sola cosa en
-pantalla, sin nav, sin chrome, sin secciones. Pero **invertido**: papel blanco, tinta negra,
-Garamond. El minimalismo es editorial, no de terminal.
+Hereda el **método** de Voider (`z:\programming\hostinger voider`): una sola cosa en
+pantalla, sin nav, sin secciones. Y el **sistema tipográfico y de color** que Federico ya
+escribió para Etérea (`Eterea_Pagina_Web/src/app/globals.css`), que es la fuente de verdad
+de su gusto. Reglas que salen de ahí y son innegociables:
 
-Reglas del front público:
+- **Nunca blanco puro ni negro absoluto.** Papel `#f7f6f3`, tinta `#26241f`. El `#fff` sobre
+  `#000` se ve duro y barato — ya se probó y se descartó.
+- **Serif para lo que se lee de un vistazo, sans para el cuerpo.** Garamond en títulos y
+  cifras; sans de sistema en párrafos, ayudas y controles. Nunca serif en todo.
+- **Escala contenida.** Display máximo ~3.4rem. Federico ya redujo su escala un 80% en
+  Etérea porque "todo se veía muy grande": no repetir el error con números gigantes.
+- Interlineado 1.65, `text-wrap: balance` en títulos y `pretty` en párrafos.
+- Blanco y negro para Visión: sin color de acento. La calidez viene del papel, no del color.
 
-- Blanco y negro. Ningún otro color.
-- Garamond en todo (`--garamond` en `public.css`, con cadena de fallback local; sin fuentes
-  externas). Ojo: Garamond es del sistema, no una fuente web.
-- Poquitas cosas. Si algo se puede sacar, se saca.
-- **Lo primero que se ve es la cifra de trabajos hechos**, grande. Después la lista, después
-  el link.
-- El brief es un **modal** sobre el portal, no una página aparte, y va **de a una pregunta
-  por pantalla**. Enter avanza.
+Del contenido:
 
-**El admin no sigue esta estética.** Es una herramienta interna y prioriza densidad y
-legibilidad: sans-serif, fondo claro, tablas. No unificarlos.
+- **Lo primero que se lee es la cifra de trabajos hechos.** Después la lista, después el
+  link.
+- El brief es un **modal** sobre el portal, no una página aparte, y va de a una pregunta por
+  pantalla. Enter avanza.
+
+**El admin no sigue esta estética.** Es herramienta interna y prioriza densidad: sans-serif,
+fondo claro, tablas. No unificarlos.
 
 ### Decisiones ya tomadas
 
