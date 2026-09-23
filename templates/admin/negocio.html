@@ -22,7 +22,12 @@
       <form onsubmit="guardarDatos(event)">
         <label>Nombre <input name="nombre" value="{{ negocio.nombre }}"></label>
         <div class="fila">
-          <label>Rubro <input name="rubro" value="{{ negocio.rubro or '' }}"></label>
+          <label>Rubro
+            <input name="rubro" value="{{ negocio.rubro or '' }}" list="lista-rubros" autocomplete="off">
+            <datalist id="lista-rubros">
+              {% for r in rubros %}<option value="{{ r.nombre }}">{% endfor %}
+            </datalist>
+          </label>
           <label>Ciudad <input name="ciudad" value="{{ negocio.ciudad or '' }}"></label>
         </div>
         <div class="fila">
@@ -46,9 +51,20 @@
 
     <section class="tarjeta">
       <h2>Borrador del mail</h2>
-      <p class="ayuda">Se copia y se manda desde tu cuenta. La plataforma no envía.</p>
+      <p class="ayuda">Se copia y se manda desde tu cuenta. La plataforma no envía.
+        {%- if negocio.rubro_rel and negocio.rubro_rel.plantilla_mail %}
+        Hay plantilla de <a href="{{ url_for('admin_rubros') }}">{{ negocio.rubro }}</a>:
+        traela y después metele el gancho de este negocio.
+        {%- elif negocio.rubro_rel %}
+        <a href="{{ url_for('admin_rubros') }}">{{ negocio.rubro }}</a> todavía no tiene plantilla.
+        {%- endif %}</p>
       <textarea id="borrador_mail" rows="12" onblur="guardarCampo('borrador_mail', this.value)">{{ negocio.borrador_mail or '' }}</textarea>
-      <button class="secundario" onclick="copiarBorrador()">Copiar al portapapeles</button>
+      <div class="acciones">
+        {% if negocio.rubro_rel and negocio.rubro_rel.plantilla_mail %}
+          <button class="secundario" onclick="traerPlantilla()">Traer la plantilla del rubro</button>
+        {% endif %}
+        <button class="secundario" onclick="copiarBorrador()">Copiar al portapapeles</button>
+      </div>
     </section>
   </div>
 

@@ -25,9 +25,11 @@ from models import (
     Brief,
     Contacto,
     Negocio,
+    Rubro,
     Trabajo,
     ahora,
     db,
+    slugify,
 )
 
 app = Flask(__name__)
@@ -99,11 +101,42 @@ def negocio_o_404(negocio_id):
     return negocio
 
 
+def rubro_o_404(rubro_id):
+    rubro = db.session.get(Rubro, rubro_id)
+    if not rubro:
+        abort(404)
+    return rubro
+
+
+def resolver_rubro(datos):
+    """El rubro que viene en el request, sea por id o por nombre escrito.
+
+    Escribir un rubro que no existe lo crea: cargar un negocio no se tiene que frenar
+    para dar de alta un rubro antes.
+    """
+    if "rubro_id" in datos:
+        valor = datos["rubro_id"]
+        return db.session.get(Rubro, int(valor)) if valor else None
+
+    nombre = (datos.get("rubro") or "").strip()
+    if not nombre:
+        return None
+    slug = slugify(nombre)
+    rubro = Rubro.query.filter_by(slug=slug).first()
+    if not rubro:
+        rubro = Rubro(nombre=nombre, slug=slug)
+        db.session.add(rubro)
+        db.session.flush()
+    return rubro
+
+
 CAMPOS_NEGOCIO = [
-    "nombre", "rubro", "ciudad", "provincia", "web", "instagram",
+    "nombre", "ciudad", "provincia", "web", "instagram",
     "facebook", "email", "telefono", "estado", "diagnostico",
     "borrador_mail", "notas",
 ]
+
+CAMPOS_RUBRO = ["plantilla_mail", "que_ofrecer", "notas"]
 
 CAMPOS_BRIEF = ["nombre", "email", "telefono"] + [c for c, _, _ in PREGUNTAS_BRIEF]
 
@@ -170,9 +203,9 @@ def admin_index():
     estado = request.args.get("estado")
     if estado:
         query = query.filter_by(estado=estado)
-    rubro = request.args.get("rubro")
+    rubro = request.args.get("rubro", type=int)
     if rubro:
-        query = query.filter_by(rubro=rubro)
+        query = query.filter_by(rubro_id=rubro)
     buscar = request.args.get("q")
     if buscar:
         query = query.filter(Negocio.nombre.ilike(f"%{buscar}%"))
@@ -183,9 +216,7 @@ def admin_index():
     for n in Negocio.query.filter(Negocio.deleted_at.is_(None)).all():
         conteos[n.estado] = conteos.get(n.estado, 0) + 1
 
-    rubros = sorted(
-        {n.rubro for n in Negocio.query.filter(Negocio.rubro.isnot(None)).all()}
-    )
+    rubros = Rubro.query.order_by(Rubro.nombre).all()
     sin_leer = Brief.query.filter_by(leido=False).count()
 
     return render_template(
@@ -201,7 +232,19 @@ def admin_index():
 @app.route("/admin/negocio/<int:negocio_id>")
 @login_required
 def admin_negocio(negocio_id):
-    return render_template("admin/negocio.html", negocio=negocio_o_404(negocio_id))
+    return render_template(
+        "admin/negocio.html",
+        negocio=negocio_o_404(negocio_id),
+        rubros=Rubro.query.order_by(Rubro.nombre).all(),
+    )
+
+
+@app.route("/admin/rubros")
+@login_required
+def admin_rubros():
+    return render_template(
+        "admin/rubros.html", rubros=Rubro.query.order_by(Rubro.nombre).all()
+    )
 
 
 @app.route("/admin/briefs")
@@ -231,7 +274,13 @@ def api_crear_negocio():
 
     negocio = Negocio()
     _campos(negocio, datos, CAMPOS_NEGOCIO)
+    negocio.rubro_rel = resolver_rubro(datos)
     negocio.estado = negocio.estado or "sin_investigar"
+
+    # El mail arranca con la plantilla del rubro. Lo específico se agrega después.
+    if not negocio.borrador_mail and negocio.rubro_rel:
+        negocio.borrador_mail = negocio.rubro_rel.render(negocio)
+
     db.session.add(negocio)
     db.session.commit()
     return jsonify(negocio.as_dict()), 201
@@ -245,6 +294,8 @@ def api_editar_negocio(negocio_id):
     estado_previo = negocio.estado
 
     _campos(negocio, datos, CAMPOS_NEGOCIO)
+    if "rubro" in datos or "rubro_id" in datos:
+        negocio.rubro_rel = resolver_rubro(datos)
 
     # Pasar a "contactado" sella la fecha, que es lo que después ordena el seguimiento.
     if negocio.estado == "contactado" and estado_previo != "contactado":
@@ -300,6 +351,87 @@ def api_borrar_contacto(contacto_id):
     if not contacto:
         abort(404)
     db.session.delete(contacto)
+    db.session.commit()
+    return jsonify({"ok": True})
+
+
+@app.route("/api/negocios/<int:negocio_id>/plantilla", methods=["POST"])
+@api_login_required
+def api_aplicar_plantilla(negocio_id):
+    """Vuelca la plantilla del rubro al borrador del negocio.
+
+    Pisa lo que haya: se usa para volver a la base cuando el borrador se fue de tema.
+    """
+    negocio = negocio_o_404(negocio_id)
+    if not negocio.rubro_rel:
+        return jsonify({"error": "el negocio no tiene rubro"}), 400
+    texto = negocio.rubro_rel.render(negocio)
+    if not texto:
+        return jsonify({"error": "el rubro no tiene plantilla"}), 400
+
+    negocio.borrador_mail = texto
+    db.session.commit()
+    return jsonify(negocio.as_dict())
+
+
+# --------------------------------------------------------------------------
+# API admin — rubros
+# --------------------------------------------------------------------------
+
+@app.route("/api/rubros", methods=["GET"])
+@api_login_required
+def api_listar_rubros():
+    rubros = Rubro.query.order_by(Rubro.nombre).all()
+    return jsonify([r.as_dict() for r in rubros])
+
+
+@app.route("/api/rubros", methods=["POST"])
+@api_login_required
+def api_crear_rubro():
+    datos = request.get_json(silent=True) or {}
+    nombre = (datos.get("nombre") or "").strip()
+    if not nombre:
+        return jsonify({"error": "el nombre es obligatorio"}), 400
+    if Rubro.query.filter_by(slug=slugify(nombre)).first():
+        return jsonify({"error": "ya existe un rubro con ese nombre"}), 400
+
+    rubro = Rubro(nombre=nombre, slug=slugify(nombre))
+    _campos(rubro, datos, CAMPOS_RUBRO)
+    db.session.add(rubro)
+    db.session.commit()
+    return jsonify(rubro.as_dict()), 201
+
+
+@app.route("/api/rubros/<int:rubro_id>", methods=["PATCH"])
+@api_login_required
+def api_editar_rubro(rubro_id):
+    rubro = rubro_o_404(rubro_id)
+    datos = request.get_json(silent=True) or {}
+    _campos(rubro, datos, CAMPOS_RUBRO)
+
+    nombre = (datos.get("nombre") or "").strip()
+    if nombre and slugify(nombre) != rubro.slug:
+        if Rubro.query.filter_by(slug=slugify(nombre)).first():
+            return jsonify({"error": "ya existe un rubro con ese nombre"}), 400
+        rubro.nombre, rubro.slug = nombre, slugify(nombre)
+    elif nombre:
+        rubro.nombre = nombre
+
+    db.session.commit()
+    return jsonify(rubro.as_dict())
+
+
+@app.route("/api/rubros/<int:rubro_id>", methods=["DELETE"])
+@api_login_required
+def api_borrar_rubro(rubro_id):
+    """Solo si no quedó ningún negocio colgando: perder el rubro de un negocio
+    cargado es perder por qué se lo contactó."""
+    rubro = rubro_o_404(rubro_id)
+    if rubro.cuantos:
+        return jsonify(
+            {"error": f"tiene {rubro.cuantos} negocio(s); movelos antes de borrarlo"}
+        ), 400
+    db.session.delete(rubro)
     db.session.commit()
     return jsonify({"ok": True})
 
@@ -407,6 +539,48 @@ def api_borrar_trabajo(trabajo_id):
 # Arranque
 # --------------------------------------------------------------------------
 
+def migrar_rubros():
+    """Pasa el rubro de texto suelto en `negocio` a la tabla `rubro`.
+
+    Corre sola y una sola vez: si la columna vieja ya no está, no hace nada. Existe
+    porque la base de dev se creó antes de que el rubro fuera una entidad.
+    """
+    from sqlalchemy import inspect, text
+
+    columnas = {c["name"] for c in inspect(db.engine).get_columns("negocio")}
+    if "rubro_id" not in columnas:
+        db.session.execute(text("ALTER TABLE negocio ADD COLUMN rubro_id INTEGER"))
+        db.session.commit()
+    if "rubro" not in columnas:
+        return
+
+    filas = db.session.execute(
+        text("SELECT id, rubro FROM negocio WHERE rubro IS NOT NULL AND rubro != ''")
+    ).all()
+    for negocio_id, nombre in filas:
+        slug = slugify(nombre)
+        rubro = Rubro.query.filter_by(slug=slug).first()
+        if not rubro:
+            rubro = Rubro(nombre=nombre.strip(), slug=slug)
+            db.session.add(rubro)
+            db.session.flush()
+        db.session.execute(
+            text("UPDATE negocio SET rubro_id = :rid WHERE id = :nid"),
+            {"rid": rubro.id, "nid": negocio_id},
+        )
+    db.session.commit()
+
+    try:
+        db.session.execute(text("ALTER TABLE negocio DROP COLUMN rubro"))
+        db.session.commit()
+    except Exception:
+        # SQLite viejo no sabe soltar columnas. Queda ahí sin molestar a nadie.
+        db.session.rollback()
+
+    if filas:
+        print(f"Rubros migrados desde texto: {len(filas)} negocio(s)")
+
+
 def crear_admin_inicial():
     """Crea el admin de la config si todavía no hay ninguno."""
     if Admin.query.first():
@@ -422,8 +596,16 @@ def crear_admin_inicial():
     print(f"Admin inicial creado: {email}")
 
 
-if __name__ == "__main__":
+def inicializar_base():
+    """Crea la estructura mínima y el admin inicial al arrancar el servicio."""
     with app.app_context():
         db.create_all()
+        migrar_rubros()
         crear_admin_inicial()
+
+
+inicializar_base()
+
+
+if __name__ == "__main__":
     app.run(debug=app.config.get("DEBUG", False), port=5000)

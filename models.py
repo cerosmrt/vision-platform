@@ -1,3 +1,5 @@
+import re
+import unicodedata
 from datetime import datetime, timezone
 
 from flask_sqlalchemy import SQLAlchemy
@@ -8,6 +10,13 @@ db = SQLAlchemy()
 
 def ahora():
     return datetime.now(timezone.utc)
+
+
+def slugify(texto):
+    """"Panificados y Confitería" -> "panificados-y-confiteria"."""
+    texto = unicodedata.normalize("NFKD", texto or "")
+    texto = texto.encode("ascii", "ignore").decode()
+    return re.sub(r"[^a-z0-9]+", "-", texto.lower()).strip("-")
 
 
 # Estados del pipeline de prospección, en orden.
@@ -76,6 +85,63 @@ class Trabajo(db.Model):
         }
 
 
+class Rubro(db.Model):
+    """Un rubro y lo que se le ofrece.
+
+    Existe para no reescribir el mismo mail cada vez: lo que le sirve a una farmacia
+    le sirve a la próxima. La plantilla es la base; el mail de cada negocio se retoca
+    después, porque el gancho tiene que ser de ese negocio y no del rubro.
+    """
+
+    __tablename__ = "rubro"
+
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(120), unique=True, nullable=False)
+    slug = db.Column(db.String(120), unique=True, nullable=False, index=True)
+
+    # El mail base. Admite {negocio} y {ciudad}, que se reemplazan al aplicarlo.
+    plantilla_mail = db.Column(db.Text)
+    # Qué le sirve a este rubro: la lista de siempre, para no volver a pensarla.
+    que_ofrecer = db.Column(db.Text)
+    notas = db.Column(db.Text)
+
+    creado_en = db.Column(db.DateTime, default=ahora)
+
+    negocios = db.relationship("Negocio", back_populates="rubro_rel", lazy="selectin")
+
+    @property
+    def cuantos(self):
+        return sum(1 for n in self.negocios if not n.deleted_at)
+
+    def render(self, negocio=None):
+        """La plantilla con los datos del negocio puestos.
+
+        Se reemplaza a mano y no con format(): la plantilla la escribe una persona y
+        una llave suelta no puede romper el borrador.
+        """
+        texto = self.plantilla_mail
+        if not texto:
+            return None
+        valores = {
+            "negocio": (negocio.nombre if negocio else "") or "",
+            "ciudad": (negocio.ciudad if negocio else "") or "",
+        }
+        for clave, valor in valores.items():
+            texto = texto.replace("{" + clave + "}", valor)
+        return texto
+
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "nombre": self.nombre,
+            "slug": self.slug,
+            "plantilla_mail": self.plantilla_mail,
+            "que_ofrecer": self.que_ofrecer,
+            "notas": self.notas,
+            "cuantos": self.cuantos,
+        }
+
+
 class Negocio(db.Model):
     """Un posible cliente. Entra a mano (prospección) o por el formulario público."""
 
@@ -83,7 +149,7 @@ class Negocio(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(200), nullable=False)
-    rubro = db.Column(db.String(120))
+    rubro_id = db.Column(db.Integer, db.ForeignKey("rubro.id"), index=True)
     ciudad = db.Column(db.String(120))
     provincia = db.Column(db.String(120))
 
@@ -107,6 +173,7 @@ class Negocio(db.Model):
     actualizado_en = db.Column(db.DateTime, default=ahora, onupdate=ahora)
     deleted_at = db.Column(db.DateTime)
 
+    rubro_rel = db.relationship("Rubro", back_populates="negocios", lazy="joined")
     contactos = db.relationship(
         "Contacto", backref="negocio", cascade="all, delete-orphan", lazy="selectin"
     )
@@ -117,6 +184,11 @@ class Negocio(db.Model):
         lazy="selectin",
         order_by="Actividad.fecha.desc()",
     )
+
+    @property
+    def rubro(self):
+        """El nombre del rubro. Las vistas siguen leyendo `negocio.rubro`."""
+        return self.rubro_rel.nombre if self.rubro_rel else None
 
     @property
     def estado_label(self):
@@ -133,6 +205,7 @@ class Negocio(db.Model):
             "id": self.id,
             "nombre": self.nombre,
             "rubro": self.rubro,
+            "rubro_id": self.rubro_id,
             "ciudad": self.ciudad,
             "provincia": self.provincia,
             "web": self.web,

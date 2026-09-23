@@ -24,7 +24,7 @@
   <select name="rubro">
     <option value="">Todos los rubros</option>
     {% for r in rubros %}
-      <option value="{{ r }}" {{ 'selected' if filtros.rubro == r }}>{{ r }}</option>
+      <option value="{{ r.id }}" {{ 'selected' if filtros.rubro == r.id }}>{{ r.nombre }} ({{ r.cuantos }})</option>
     {% endfor %}
   </select>
   {% if filtros.estado %}<input type="hidden" name="estado" value="{{ filtros.estado }}">{% endif %}
@@ -65,9 +65,14 @@
     <h2>Nuevo negocio</h2>
     <label>Nombre <input name="nombre" required></label>
     <div class="fila">
-      <label>Rubro <input name="rubro"></label>
+      <label>Rubro <input name="rubro" list="lista-rubros" autocomplete="off"></label>
       <label>Ciudad <input name="ciudad"></label>
     </div>
+    <datalist id="lista-rubros">
+      {% for r in rubros %}<option value="{{ r.nombre }}">{% endfor %}
+    </datalist>
+    <p class="ayuda">Si el rubro tiene plantilla, el borrador del mail arranca con ella.
+      Un rubro que no existe se crea solo.</p>
     <div class="fila">
       <label>Email <input name="email" type="email"></label>
       <label>Teléfono <input name="telefono"></label>
